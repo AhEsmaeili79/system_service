@@ -1,0 +1,291 @@
+{
+  "rabbit_version": "3.13.0",
+  "rabbitmq_version": "3.13.0",
+  "users": [
+    {
+      "name": "admin",
+      "password_hash": "XQYhZ3N8fB2Kp9vR6mN1cL4sA7jE0wT5uI8oP3qW6yZ9",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": "administrator"
+    },
+    {
+      "name": "user_service",
+      "password_hash": "YQZhZ3N8fB2Kp9vR6mN1cL4sA7jE0wT5uI8oP3qW6yZ0",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": "management"
+    },
+    {
+      "name": "communication_service",
+      "password_hash": "ZQZhZ3N8fB2Kp9vR6mN1cL4sA7jE0wT5uI8oP3qW6yZ1",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": "management"
+    },
+    {
+      "name": "split_service",
+      "password_hash": "AQZhZ3N8fB2Kp9vR6mN1cL4sA7jE0wT5uI8oP3qW6yZ2",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": "management"
+    }
+  ],
+  "vhosts": [
+    { "name": "/" },
+    { "name": "user_service" },
+    { "name": "communication_service" },
+    { "name": "split_service" }
+  ],
+  "permissions": [
+    {
+      "user": "admin",
+      "vhost": "/",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    },
+    {
+      "user": "user_service",
+      "vhost": "/",
+      "configure": "user.*|auth.*",
+      "write": "user.*|auth.*",
+      "read": "user.*|auth.*"
+    },
+    {
+      "user": "user_service",
+      "vhost": "user_service",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    },
+    {
+      "user": "communication_service",
+      "vhost": "/",
+      "configure": "communication.*|email.*|sms.*",
+      "write": "communication.*|email.*|sms.*",
+      "read": "communication.*|email.*|sms.*"
+    },
+    {
+      "user": "communication_service",
+      "vhost": "communication_service",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    },
+    {
+      "user": "split_service",
+      "vhost": "/",
+      "configure": "split.*|expense.*|settlement.*",
+      "write": "split.*|expense.*|settlement.*",
+      "read": "split.*|expense.*|settlement.*"
+    },
+    {
+      "user": "split_service",
+      "vhost": "split_service",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    }
+  ],
+  "queues": [
+    {
+      "name": "user.registration.queue",
+      "vhost": "/",
+      "durable": true,
+      "arguments": {
+        "x-dead-letter-exchange": "dlx",
+        "x-message-ttl": 300000,
+        "x-max-retries": 3
+      }
+    },
+    {
+      "name": "user.auth.queue",
+      "vhost": "/",
+      "durable": true,
+      "arguments": {
+        "x-dead-letter-exchange": "dlx",
+        "x-message-ttl": 300000
+      }
+    },
+    {
+      "name": "communication.email.queue",
+      "vhost": "/",
+      "durable": true,
+      "arguments": {
+        "x-dead-letter-exchange": "dlx",
+        "x-message-ttl": 600000,
+        "x-max-retries": 5
+      }
+    },
+    {
+      "name": "communication.sms.queue",
+      "vhost": "/",
+      "durable": true,
+      "arguments": {
+        "x-dead-letter-exchange": "dlx",
+        "x-message-ttl": 600000,
+        "x-max-retries": 5
+      }
+    },
+    {
+      "name": "communication.otp.queue",
+      "vhost": "/",
+      "durable": true,
+      "arguments": {
+        "x-dead-letter-exchange": "dlx",
+        "x-message-ttl": 300000,
+        "x-max-retries": 3
+      }
+    },
+    {
+      "name": "split.expense.queue",
+      "vhost": "/",
+      "durable": true,
+      "arguments": {
+        "x-dead-letter-exchange": "dlx",
+        "x-message-ttl": 1800000
+      }
+    },
+    {
+      "name": "split.settlement.queue",
+      "vhost": "/",
+      "durable": true,
+      "arguments": {
+        "x-dead-letter-exchange": "dlx",
+        "x-message-ttl": 1800000
+      }
+    },
+    {
+      "name": "dlx",
+      "vhost": "/",
+      "durable": true
+    },
+    {
+      "name": "dlq.user",
+      "vhost": "/",
+      "durable": true
+    },
+    {
+      "name": "dlq.communication",
+      "vhost": "/",
+      "durable": true
+    },
+    {
+      "name": "dlq.split",
+      "vhost": "/",
+      "durable": true
+    }
+  ],
+  "exchanges": [
+    {
+      "name": "user.exchange",
+      "vhost": "/",
+      "type": "topic",
+      "durable": true,
+      "arguments": {}
+    },
+    {
+      "name": "communication.exchange",
+      "vhost": "/",
+      "type": "topic",
+      "durable": true,
+      "arguments": {}
+    },
+    {
+      "name": "split.exchange",
+      "vhost": "/",
+      "type": "topic",
+      "durable": true,
+      "arguments": {}
+    },
+    {
+      "name": "dlx",
+      "vhost": "/",
+      "type": "topic",
+      "durable": true,
+      "arguments": {}
+    }
+  ],
+  "bindings": [
+    {
+      "source": "user.exchange",
+      "vhost": "/",
+      "destination": "user.registration.queue",
+      "destination_type": "queue",
+      "routing_key": "user.registration"
+    },
+    {
+      "source": "user.exchange",
+      "vhost": "/",
+      "destination": "user.auth.queue",
+      "destination_type": "queue",
+      "routing_key": "user.auth"
+    },
+    {
+      "source": "communication.exchange",
+      "vhost": "/",
+      "destination": "communication.email.queue",
+      "destination_type": "queue",
+      "routing_key": "communication.email"
+    },
+    {
+      "source": "communication.exchange",
+      "vhost": "/",
+      "destination": "communication.sms.queue",
+      "destination_type": "queue",
+      "routing_key": "communication.sms"
+    },
+    {
+      "source": "communication.exchange",
+      "vhost": "/",
+      "destination": "communication.otp.queue",
+      "destination_type": "queue",
+      "routing_key": "communication.otp"
+    },
+    {
+      "source": "split.exchange",
+      "vhost": "/",
+      "destination": "split.expense.queue",
+      "destination_type": "queue",
+      "routing_key": "split.expense"
+    },
+    {
+      "source": "split.exchange",
+      "vhost": "/",
+      "destination": "split.settlement.queue",
+      "destination_type": "queue",
+      "routing_key": "split.settlement"
+    },
+    {
+      "source": "dlx",
+      "vhost": "/",
+      "destination": "dlq.user",
+      "destination_type": "queue",
+      "routing_key": "user.*"
+    },
+    {
+      "source": "dlx",
+      "vhost": "/",
+      "destination": "dlq.communication",
+      "destination_type": "queue",
+      "routing_key": "communication.*"
+    },
+    {
+      "source": "dlx",
+      "vhost": "/",
+      "destination": "dlq.split",
+      "destination_type": "queue",
+      "routing_key": "split.*"
+    }
+  ],
+  "policies": [
+    {
+      "vhost": "/",
+      "name": "ttl-policy",
+      "pattern": ".*\\.queue$",
+      "apply-to": "queues",
+      "definition": {
+        "message-ttl": 3600000
+      },
+      "priority": 1
+    }
+  ]
+}
+  
